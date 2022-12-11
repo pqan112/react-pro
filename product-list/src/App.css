@@ -1,0 +1,14 @@
+.App {
+  text-align: center;
+}
+
+.container {
+  width: 400px;
+  border: 1px solid #000;
+  margin: 15px auto;
+  padding: 15px;
+}
+
+.container form {
+  text-align: left;
+}

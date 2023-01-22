@@ -1,0 +1,20 @@
+{
+	"extends": ["react-app", "prettier"],
+	"plugins": ["react", "prettier"],
+	"rules": {
+		"prettier/prettier": [
+			"warn",
+			{
+				"arrowParens": "always",
+				"semi": false,
+				"trailingComma": "none",
+				"tabWidth": 4,
+				"endOfLine": "auto",
+				"useTabs": true,
+				"singleQuote": true,
+				"printWidth": 80,
+				"jsxSingleQuote": true
+			}
+		]
+	}
+}

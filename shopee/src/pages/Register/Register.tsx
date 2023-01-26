@@ -1,24 +1,27 @@
 import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation } from '@tanstack/react-query'
 import { omit } from 'lodash'
+import { useContext } from 'react'
 
 import { schema, type RegisterSchema } from 'src/utils/rules'
 import Input from 'src/components/Input'
 import { registerAccount } from 'src/apis/auth.api'
 import { isAxiosUnprocessableEntityError } from 'src/utils/utils'
 import { ErrorResponse } from 'src/types/utils.type'
+import { AppContext } from 'src/contexts/app.context'
 
 type FormData = RegisterSchema
 
 const Register = () => {
+  const navigate = useNavigate()
+  const { setIsAuthenticated } = useContext(AppContext)
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-    // trigger,
-    // watch,
     setError
   } = useForm<FormData>({
     resolver: yupResolver(schema)
@@ -33,8 +36,9 @@ const Register = () => {
     // const { confirm_password, ...body } = data
     const body = omit(data, ['confirm_password'])
     registerAccountMutation.mutate(body, {
-      onSuccess: (data) => {
-        console.log(data)
+      onSuccess: () => {
+        setIsAuthenticated(true)
+        navigate('/')
       },
       onError: (error) => {
         if (

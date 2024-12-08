@@ -7,7 +7,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 export default function Button(props: ButtonProps) {
   const { className, isLoading, disabled, children, ...rest } = props
-  const newClassName = disabled ? clsx(className, 'cursor-not-allowed') : className
+  const newClassName = disabled ? clsx(className, 'cursor-not-allowed opacity-80') : className
   return (
     <button className={newClassName} disabled={disabled} {...rest}>
       {isLoading && (

@@ -1,9 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
-import { omitBy, isUndefined } from 'lodash'
-
-import productApi from 'src/apis/product.api'
+import omitBy from 'lodash/omitBy'
+import isUndefined from 'lodash/isUndefined'
 import Pagination from 'src/components/Pagination'
 import useQueryParams from 'src/hooks/useQueryParams'
+import { useProductList } from 'src/queries/useProduct'
 import { ProductListConfig } from 'src/types/product.type'
 import AsideFilter from './components/AsideFilter'
 import Product from './components/Product'
@@ -31,13 +30,7 @@ const ProductList = () => {
     isUndefined
   )
 
-  const { data } = useQuery({
-    queryKey: ['products', queryConfig],
-    queryFn: () => {
-      return productApi.getProducts(queryConfig as ProductListConfig)
-    },
-    keepPreviousData: true
-  })
+  const { data } = useProductList(queryConfig as ProductListConfig)
   console.log(data)
 
   return (

@@ -31,7 +31,7 @@ const Login = () => {
     mutationFn: (body: FormData) => authApi.login(body)
   })
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = (data: FormData) => {
     loginMutation.mutate(data, {
       onSuccess: (data) => {
         setIsAuthenticated(true)
@@ -52,13 +52,17 @@ const Login = () => {
         }
       }
     })
-  })
+  }
   return (
     <div className='bg-orange'>
       <div className='container'>
         <div className='grid grid-cols-1 py-12 lg:grid-cols-5 lg:py-32 lg:pr-10'>
           <div className='lg:col-span-2 lg:col-start-4'>
-            <form className='rounded bg-white p-10 shadow-sm' onSubmit={onSubmit} noValidate>
+            <form
+              className='rounded bg-white p-10 shadow-sm'
+              onSubmit={handleSubmit(onSubmit)}
+              noValidate
+            >
               <h1 className='text-2xl'>Đăng nhập</h1>
               <Input
                 type='email'

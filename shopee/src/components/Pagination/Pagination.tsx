@@ -51,7 +51,16 @@ const Pagination = ({ queryConfig, pageSize }: Props) => {
           pageNumber > page + RANGE &&
           pageNumber < pageSize - RANGE + 1
         ) {
+          /* [1] 2 3 ... 19 20
+           1 [2] 3 4 ... 19 20
+           1 2 [3] 4 5 ... 19 20
+           1 2 3 [4] 5 6 ... 19 20
+           1 2 3 4 [5] 6 7 ... 19 20 */
+
           return renderDotAfter(index)
+          // page > 5 and page < 16
+          /* 1 2 ... 4 5 [6] 7 8 ... 19 20
+             1 2 ... 13 14 [15] 16 17 ... 19 20 */
         } else if (page > RANGE * 2 + 1 && page < pageSize - RANGE * 2) {
           if (pageNumber < page - RANGE && pageNumber > RANGE) {
             return renderDotBefore(index)
@@ -63,6 +72,11 @@ const Pagination = ({ queryConfig, pageSize }: Props) => {
           pageNumber > RANGE &&
           pageNumber < page - RANGE
         ) {
+          /* 1 2 ... 14 15 [16] 17 18 19 20.
+             1 2 ... 15 16 [17] 18 19 20
+             1 2 ... 16 17 [18] 19 20
+             1 2 ...  17 18 [19] 20
+             1 2 ...  18 19 [20] */
           return renderDotBefore(index)
         }
 

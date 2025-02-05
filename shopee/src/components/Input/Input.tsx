@@ -7,7 +7,6 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   classNameError?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register?: UseFormRegister<any>
-  autoComplete?: string
 }
 
 const Input = ({

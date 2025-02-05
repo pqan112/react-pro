@@ -1,13 +1,22 @@
 import React from 'react'
 
 const ProductRating = ({ rating }: { rating: number }) => {
+  // rating = 3.4
+
   const handleWidth = (order: number) => {
+    // 1 <=3.4 => 100%
+    // 2 <=3.4 => 100%
+    // 3 <=3.4 => 100%
+
     if (order <= rating) {
       return '100%'
     }
+    // 4 > 3.4  && 4 - 3.4 < 1 => 40%
+    // return 3.4 - 3 = 0.4 * 100 = 40%
     if (order > rating && order - rating < 1) {
       return (rating - Math.floor(rating)) * 100 + '%'
     }
+    // 5 > 3.4 && 5 - 3.4 > 1 => 0%
     return '0%'
   }
 

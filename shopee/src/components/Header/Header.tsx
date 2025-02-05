@@ -11,7 +11,7 @@ const Header = () => {
   const { setIsAuthenticated, isAuthenticated, setProfile, profile } = useContext(AppContext)
 
   const logoutMutation = useMutation({
-    mutationFn: () => authApi.logout(),
+    mutationFn: authApi.logout,
     onSuccess: () => {
       setIsAuthenticated(false)
       setProfile(null)

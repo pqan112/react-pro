@@ -14,7 +14,8 @@ export type QueryConfig = {
 
 const ProductList = () => {
   const queryParams: QueryConfig = useQueryParams()
-
+  // người dùng có thể sẽ nhập các cặp key-value vào query params
+  // chỉ đưa những queryParams cần thiết để gọi api
   const queryConfig: QueryConfig = omitBy(
     {
       page: queryParams.page || '1',
@@ -31,12 +32,11 @@ const ProductList = () => {
   )
 
   const { data } = useProductList(queryConfig as ProductListConfig)
-  console.log(data)
 
   return (
     <div className='bg-gray-200 py-6'>
       <div className='container'>
-        {data ? (
+        {data && (
           <div className='grid grid-cols-12 gap-6'>
             <div className='col-span-3'>
               <AsideFilter />
@@ -61,7 +61,7 @@ const ProductList = () => {
               />
             </div>
           </div>
-        ) : null}
+        )}
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-export const QueryKey = {
-  asc: 'asc',
-  desc: 'desc'
+export const QueryKeys = {
+  products: 'products',
+  categories: 'categories'
 } as const

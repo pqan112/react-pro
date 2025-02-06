@@ -13,8 +13,9 @@ interface Props {
 
 const SortProductList = ({ queryConfig, pageSize }: Props) => {
   const page = Number(queryConfig.page)
-  const { sort_by = sortBy.createdAt, order } = queryConfig
+  const { sort_by = sortBy.view, order } = queryConfig
   const navigate = useNavigate()
+
   const isActiveSortBy = (sortByValue: Exclude<ProductListConfig['sort_by'], undefined>) => {
     return sort_by === sortByValue
   }
@@ -46,7 +47,7 @@ const SortProductList = ({ queryConfig, pageSize }: Props) => {
   }
 
   return (
-    <div className='bg-gray-300/40 py-4 px-3'>
+    <div className='bg-gray-300/40 px-3 py-4'>
       <div className='flex flex-wrap items-center justify-between gap-2'>
         <div className='flex flex-wrap items-center gap-2'>
           <div>Sắp xếp theo</div>

@@ -1,19 +1,34 @@
+import clsx from 'clsx'
+import { Controller, useForm } from 'react-hook-form'
 import { createSearchParams, Link } from 'react-router-dom'
 import Button from 'src/components/Button'
-import Input from 'src/components/Input'
+import InputNumber from 'src/components/InputNumber'
 import path from 'src/constants/path'
 import { Category } from 'src/types/category.type'
 import { QueryConfig } from '../../ProductList'
-import clsx from 'clsx'
 
 interface AsideFilterProps {
   queryConfig: QueryConfig
   categories: Category[]
 }
 
+type FormData = {
+  price_min: string
+  price_max: string
+}
+
 const AsideFilter = (props: AsideFilterProps) => {
   const { queryConfig, categories } = props
   const { category } = queryConfig
+
+  const { control, handleSubmit, watch } = useForm<FormData>({
+    defaultValues: {
+      price_min: '',
+      price_max: ''
+    }
+  })
+  const valueForm = watch()
+  console.log('valueForm', valueForm)
 
   return (
     <div className='py-4'>
@@ -96,20 +111,41 @@ const AsideFilter = (props: AsideFilterProps) => {
         <div>Khoảng giá</div>
         <form className='mt-2'>
           <div className='flex items-start'>
-            <Input
-              type='text'
-              className='grow'
-              name='from'
-              placeholder='đ Từ'
-              classNameInput='p-1 text-sm w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-sm'
+            <Controller
+              control={control}
+              name='price_min'
+              render={({ field }) => {
+                return (
+                  <InputNumber
+                    type='text'
+                    className='grow'
+                    name='from'
+                    placeholder='đ Từ'
+                    classNameInput='p-1 text-sm w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-sm'
+                    onChange={(event) => field.onChange(event)}
+                    value={field.value}
+                  />
+                )
+              }}
             />
-            <div className='mx-2 mt-2 shrink-0'>-</div>
-            <Input
-              type='text'
-              className='grow'
-              name='from'
-              placeholder='đ Đến'
-              classNameInput='p-1 text-sm w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-sm'
+
+            <div className='mx-2 mt-1 shrink-0'>-</div>
+            <Controller
+              control={control}
+              name='price_max'
+              render={({ field }) => {
+                return (
+                  <InputNumber
+                    type='text'
+                    className='grow'
+                    name='from'
+                    placeholder='đ Đến'
+                    classNameInput='p-1 text-sm w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-sm'
+                    onChange={(event) => field.onChange(event)}
+                    value={field.value}
+                  />
+                )
+              }}
             />
           </div>
           <Button

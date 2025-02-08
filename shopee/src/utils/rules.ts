@@ -129,7 +129,19 @@ export const schema = yup.object({
     .required('Password là bắt buộc')
     .min(6, 'Độ dài từ 6 - 160 ký tự')
     .max(160, 'Độ dài từ 6 - 160 ký tự')
-    .oneOf([yup.ref('password')], 'Nhập lại password không khớp')
+    .oneOf([yup.ref('password')], 'Nhập lại password không khớp'),
+  price_min: yup.string().test({
+    name: 'price-not-allowed',
+    message: 'Giá không phù hợp',
+    test: function (value) {
+      const price_min = value
+      const { price_max } = this.parent as { price_min: string; price_max: string }
+      if (price_min !== '' && price_max !== '') {
+        return Number(price_max) >= Number(price_min)
+      }
+      return price_min !== '' || price_max !== ''
+    }
+  })
 })
 
 export type RegisterSchema = yup.InferType<typeof schema>

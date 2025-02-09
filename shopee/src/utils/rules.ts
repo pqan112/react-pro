@@ -1,8 +1,10 @@
-import type { UseFormGetValues, RegisterOptions, UseFormWatch } from 'react-hook-form'
+import { NoUndefinedField } from 'src/types/utils.type'
 import * as yup from 'yup'
-type Rules = {
-  [key in 'email' | 'password' | 'confirm_password']?: RegisterOptions
-}
+import { AnyObject } from 'yup/lib/types'
+
+// type Rules = {
+//   [key in 'email' | 'password' | 'confirm_password']?: RegisterOptions
+// }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 // export const getRules = (getValues?: UseFormGetValues<any>): Rules => ({
@@ -112,6 +114,14 @@ type Rules = {
 //   }
 // })
 
+function testPriceRange(this: yup.TestContext<AnyObject>) {
+  const { price_min, price_max } = this.parent as { price_min: string; price_max: string }
+  if (price_min !== '' && price_max !== '') {
+    return Number(price_max) >= Number(price_min)
+  }
+  return price_min !== '' || price_max !== ''
+}
+
 export const schema = yup.object({
   email: yup
     .string()
@@ -133,17 +143,22 @@ export const schema = yup.object({
   price_min: yup.string().test({
     name: 'price-not-allowed',
     message: 'Giá không phù hợp',
-    test: function (value) {
-      const price_min = value
-      const { price_max } = this.parent as { price_min: string; price_max: string }
-      if (price_min !== '' && price_max !== '') {
-        return Number(price_max) >= Number(price_min)
-      }
-      return price_min !== '' || price_max !== ''
-    }
+    test: testPriceRange
+  }),
+  price_max: yup.string().test({
+    name: 'price-not-allowed',
+    message: 'Giá không phù hợp',
+    test: testPriceRange
   })
 })
 
-export type RegisterSchema = yup.InferType<typeof schema>
-export const loginSchema = schema.omit(['confirm_password'])
+export type Schema = yup.InferType<typeof schema>
+
+export const loginSchema = schema.omit(['confirm_password', 'price_max', 'price_min'])
 export type LoginSchema = yup.InferType<typeof loginSchema>
+
+export const registerSchema = schema.omit(['price_max', 'price_min'])
+export type RegisterSchema = yup.InferType<typeof registerSchema>
+
+export const priceRangeSchema = schema.pick(['price_max', 'price_min'])
+export type PriceRangeSchema = yup.InferType<typeof priceRangeSchema>

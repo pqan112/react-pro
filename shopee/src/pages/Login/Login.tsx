@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { yupResolver } from '@hookform/resolvers/yup'
 
-import { schema, type LoginSchema } from 'src/utils/rules'
+import { loginSchema, schema, type LoginSchema } from 'src/utils/rules'
 import { useMutation } from '@tanstack/react-query'
 import { isAxiosUnprocessableEntityError } from 'src/utils/utils'
 import { ErrorResponse } from 'src/types/utils.type'
@@ -12,7 +12,6 @@ import { useContext } from 'react'
 import { AppContext } from 'src/contexts/app.context'
 
 type FormData = LoginSchema
-const loginSchema = schema.omit(['confirm_password'])
 
 const Login = () => {
   const { setIsAuthenticated, setProfile } = useContext(AppContext)
@@ -84,7 +83,7 @@ const Login = () => {
               <div className='mt-3'>
                 <button
                   type='submit'
-                  className='w-full bg-red-500 py-4 px-2 text-center text-sm uppercase text-white hover:bg-red-700'
+                  className='w-full bg-red-500 px-2 py-4 text-center text-sm uppercase text-white hover:bg-red-700'
                 >
                   Đăng nhập
                 </button>

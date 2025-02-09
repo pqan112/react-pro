@@ -1,10 +1,13 @@
+import { yupResolver } from '@hookform/resolvers/yup'
 import clsx from 'clsx'
 import { Controller, useForm } from 'react-hook-form'
-import { createSearchParams, Link } from 'react-router-dom'
+import { createSearchParams, Link, useNavigate } from 'react-router-dom'
 import Button from 'src/components/Button'
 import InputNumber from 'src/components/InputNumber'
 import path from 'src/constants/path'
 import { Category } from 'src/types/category.type'
+import { NoUndefinedField } from 'src/types/utils.type'
+import { PriceRangeSchema, schema } from 'src/utils/rules'
 import { QueryConfig } from '../../ProductList'
 
 interface AsideFilterProps {
@@ -12,23 +15,45 @@ interface AsideFilterProps {
   categories: Category[]
 }
 
-type FormData = {
-  price_min: string
-  price_max: string
-}
+type FormData = NoUndefinedField<PriceRangeSchema>
+
+const priceSchema = schema.pick(['price_min', 'price_max'])
 
 const AsideFilter = (props: AsideFilterProps) => {
   const { queryConfig, categories } = props
   const { category } = queryConfig
 
-  const { control, handleSubmit, watch } = useForm<FormData>({
+  const {
+    control,
+    handleSubmit,
+    trigger,
+    formState: { errors }
+  } = useForm<FormData>({
+    resolver: yupResolver(priceSchema),
+    shouldFocusError: false,
     defaultValues: {
       price_min: '',
       price_max: ''
     }
   })
-  const valueForm = watch()
-  console.log('valueForm', valueForm)
+  const navigate = useNavigate()
+
+  const onSubmit = handleSubmit(
+    (values: FormData) => {
+      console.log(values)
+      navigate({
+        pathname: path.home,
+        search: createSearchParams({
+          ...queryConfig,
+          price_max: values.price_max,
+          price_min: values.price_min
+        }).toString()
+      })
+    },
+    (error) => {
+      error.price_max?.ref?.focus()
+    }
+  )
 
   return (
     <div className='py-4'>
@@ -109,7 +134,7 @@ const AsideFilter = (props: AsideFilterProps) => {
       <div className='my-4 h-[1px] bg-gray-300' />
       <div className='my-5'>
         <div>Khoảng giá</div>
-        <form className='mt-2'>
+        <form className='mt-2' onSubmit={onSubmit}>
           <div className='flex items-start'>
             <Controller
               control={control}
@@ -122,14 +147,20 @@ const AsideFilter = (props: AsideFilterProps) => {
                     name='from'
                     placeholder='đ Từ'
                     classNameInput='p-1 text-sm w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-sm'
-                    onChange={(event) => field.onChange(event)}
+                    classNameError='hidden'
+                    onChange={(event) => {
+                      field.onChange(event)
+                      trigger('price_max')
+                    }}
                     value={field.value}
+                    ref={field.ref}
                   />
                 )
               }}
             />
 
             <div className='mx-2 mt-1 shrink-0'>-</div>
+
             <Controller
               control={control}
               name='price_max'
@@ -141,17 +172,22 @@ const AsideFilter = (props: AsideFilterProps) => {
                     name='from'
                     placeholder='đ Đến'
                     classNameInput='p-1 text-sm w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-sm'
-                    onChange={(event) => field.onChange(event)}
+                    classNameError='hidden'
+                    onChange={(event) => {
+                      field.onChange(event)
+                      trigger('price_min')
+                    }}
                     value={field.value}
+                    ref={field.ref}
                   />
                 )
               }}
             />
           </div>
-          <Button
-            disabled
-            className='flex w-full items-center justify-center bg-orange p-2 text-sm uppercase text-white hover:bg-orange/80'
-          >
+          <div className='mt-1 min-h-[1.3rem] text-center text-sm text-red-600'>
+            {errors.price_min?.message}
+          </div>
+          <Button className='flex w-full items-center justify-center bg-orange p-2 text-sm uppercase text-white hover:bg-orange/80'>
             Áp dụng
           </Button>
         </form>

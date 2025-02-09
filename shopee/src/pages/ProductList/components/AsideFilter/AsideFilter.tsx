@@ -40,7 +40,6 @@ const AsideFilter = (props: AsideFilterProps) => {
 
   const onSubmit = handleSubmit(
     (values: FormData) => {
-      console.log(values)
       navigate({
         pathname: path.home,
         search: createSearchParams({

@@ -9,6 +9,7 @@ import NotFound from './pages/NotFound'
 import ProductList from './pages/ProductList'
 import Profile from './pages/Profile'
 import Register from './pages/Register'
+import ProductDetail from './pages/ProductDetail'
 
 export default function useRouteElements() {
   function ProtectedRoute() {
@@ -58,6 +59,14 @@ export default function useRouteElements() {
           )
         }
       ]
+    },
+    {
+      path: path.productDetail,
+      element: (
+        <MainLayout>
+          <ProductDetail />
+        </MainLayout>
+      )
     },
     {
       path: '',

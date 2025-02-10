@@ -9,6 +9,8 @@ import { Category } from 'src/types/category.type'
 import { NoUndefinedField } from 'src/types/utils.type'
 import { PriceRangeSchema, schema } from 'src/utils/rules'
 import { QueryConfig } from '../../ProductList'
+import RatingStars from '../RatingStars'
+import omit from 'lodash/omit'
 
 interface AsideFilterProps {
   queryConfig: QueryConfig
@@ -45,7 +47,8 @@ const AsideFilter = (props: AsideFilterProps) => {
         search: createSearchParams({
           ...queryConfig,
           price_max: values.price_max,
-          price_min: values.price_min
+          price_min: values.price_min,
+          page: String(1)
         }).toString()
       })
     },
@@ -53,6 +56,15 @@ const AsideFilter = (props: AsideFilterProps) => {
       error.price_max?.ref?.focus()
     }
   )
+
+  const handleRemoveAll = () => {
+    navigate({
+      pathname: path.home,
+      search: createSearchParams(
+        omit(queryConfig, ['category', 'price_min', 'price_max', 'rating_filter'])
+      ).toString()
+    })
+  }
 
   return (
     <div className='py-4'>
@@ -89,7 +101,8 @@ const AsideFilter = (props: AsideFilterProps) => {
                   pathname: path.home,
                   search: createSearchParams({
                     ...queryConfig,
-                    category: categoryItem._id
+                    category: categoryItem._id,
+                    page: String(1)
                   }).toString()
                 }}
                 className={clsx('relative px-2', {
@@ -193,58 +206,12 @@ const AsideFilter = (props: AsideFilterProps) => {
       </div>
       <div className='my-4 h-[1px] bg-gray-300' />
       <div className='text-sm'>Đánh giá</div>
-      <ul>
-        <li>
-          <Link to='' className='flex items-center text-sm'>
-            {Array(5)
-              .fill(0)
-              .map((_, index) => (
-                <svg viewBox='0 0 30 30' className='mr-1 h-4 w-4' key={index}>
-                  <defs>
-                    <linearGradient id='star__hollow' x1='50%' x2='50%' y1='0%' y2='99.0177926%'>
-                      <stop offset='0%' stopColor='#FFD211' />
-                      <stop offset='100%' stopColor='#FFAD27' />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    fill='none'
-                    fillRule='evenodd'
-                    stroke='url(#star__hollow)'
-                    strokeWidth={2}
-                    d='M23.226809 28.390899l-1.543364-9.5505903 6.600997-6.8291523-9.116272-1.4059447-4.01304-8.63019038-4.013041 8.63019038-9.116271 1.4059447 6.600997 6.8291523-1.543364 9.5505903 8.071679-4.5038874 8.071679 4.5038874z'
-                  />
-                </svg>
-              ))}
-            <span>Trở lên</span>
-          </Link>
-        </li>
-        <li>
-          <Link to='' className='flex items-center text-sm'>
-            {Array(5)
-              .fill(0)
-              .map((_, index) => (
-                <svg viewBox='0 0 30 30' className='mr-1 h-4 w-4' key={index}>
-                  <defs>
-                    <linearGradient id='star__hollow' x1='50%' x2='50%' y1='0%' y2='99.0177926%'>
-                      <stop offset='0%' stopColor='#FFD211' />
-                      <stop offset='100%' stopColor='#FFAD27' />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    fill='none'
-                    fillRule='evenodd'
-                    stroke='url(#star__hollow)'
-                    strokeWidth={2}
-                    d='M23.226809 28.390899l-1.543364-9.5505903 6.600997-6.8291523-9.116272-1.4059447-4.01304-8.63019038-4.013041 8.63019038-9.116271 1.4059447 6.600997 6.8291523-1.543364 9.5505903 8.071679-4.5038874 8.071679 4.5038874z'
-                  />
-                </svg>
-              ))}
-            <span>Trở lên</span>
-          </Link>
-        </li>
-      </ul>
+      <RatingStars queryConfig={queryConfig} />
       <div className='my-4 h-[1px] bg-gray-300' />
-      <Button className='flex w-full items-center justify-center bg-orange p-2 text-sm uppercase text-white hover:bg-orange/80'>
+      <Button
+        className='flex w-full items-center justify-center bg-orange p-2 text-sm uppercase text-white hover:bg-orange/80'
+        onClick={handleRemoveAll}
+      >
         Xóa tất cả
       </Button>
     </div>

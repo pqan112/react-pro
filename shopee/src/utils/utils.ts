@@ -12,10 +12,12 @@ export function isAxiosUnprocessableEntityError<FormError>(
   return isAxiosError(error) && error.response?.status === HttpStatusCode.UnprocessableEntity
 }
 
-export function formatCurrency(currency: number) {
-  return new Intl.NumberFormat('de-DE').format(currency)
+// Format number to currency style (e.g. 1.000,00 €)
+export function formatCurrency(value: number) {
+  return new Intl.NumberFormat('de-DE').format(value)
 }
 
+// Format number to social style (e.g. 1.2k, 1.5M, 2.3B)
 export function formatNumberToSocialStyle(value: number) {
   return new Intl.NumberFormat('en', {
     notation: 'compact',
@@ -24,4 +26,8 @@ export function formatNumberToSocialStyle(value: number) {
     .format(value)
     .replace('.', ',')
     .toLowerCase()
+}
+
+export function rateSale(original: number, sale: number) {
+  return Math.round(((original - sale) / original) * 100) + '%'
 }

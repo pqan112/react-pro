@@ -1,6 +1,14 @@
 import React from 'react'
 
-const ProductRating = ({ rating }: { rating: number }) => {
+const ProductRating = ({
+  rating,
+  activeClassname = 'h-3 w-3 fill-yellow-500 text-yellow-500',
+  inactiveClassname = 'h-3 w-3 fill-current text-gray-400'
+}: {
+  rating: number
+  activeClassname?: string
+  inactiveClassname?: string
+}) => {
   // rating = 3.4
 
   const handleWidth = (order: number) => {
@@ -35,7 +43,7 @@ const ProductRating = ({ rating }: { rating: number }) => {
                 viewBox='0 0 15 15'
                 x={0}
                 y={0}
-                className='h-3 w-3 fill-yellow-500 text-yellow-500'
+                className={activeClassname}
               >
                 <polygon
                   points='7.5 .8 9.7 5.4 14.5 5.9 10.7 9.1 11.8 14.2 7.5 11.6 3.2 14.2 4.3 9.1 .5 5.9 5.3 5.4'
@@ -50,7 +58,7 @@ const ProductRating = ({ rating }: { rating: number }) => {
               viewBox='0 0 15 15'
               x={0}
               y={0}
-              className='h-3 w-3 fill-current text-gray-400'
+              className={inactiveClassname}
             >
               <polygon
                 points='7.5 .8 9.7 5.4 14.5 5.9 10.7 9.1 11.8 14.2 7.5 11.6 3.2 14.2 4.3 9.1 .5 5.9 5.3 5.4'

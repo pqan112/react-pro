@@ -8,9 +8,9 @@ import path from 'src/constants/path'
 import { Category } from 'src/types/category.type'
 import { NoUndefinedField } from 'src/types/utils.type'
 import { PriceRangeSchema, schema } from 'src/utils/rules'
-import { QueryConfig } from '../../ProductList'
 import RatingStars from '../RatingStars'
 import omit from 'lodash/omit'
+import { QueryConfig } from 'src/hooks/useQueryConfig'
 
 interface AsideFilterProps {
   queryConfig: QueryConfig
@@ -53,7 +53,7 @@ const AsideFilter = (props: AsideFilterProps) => {
       })
     },
     (error) => {
-      error.price_max?.ref?.focus()
+      error.price_max?.ref?.focus?.()
     }
   )
 

@@ -7,10 +7,16 @@ import InputNumber from 'src/components/InputNumber'
 import ProductRating from 'src/components/ProductRating'
 import { QueryKeys } from 'src/constants/queryKey'
 import { Product } from 'src/types/product.type'
-import { formatCurrency, formatNumberToSocialStyle, rateSale } from 'src/utils/utils'
+import {
+  formatCurrency,
+  formatNumberToSocialStyle,
+  getIdFromNameId,
+  rateSale
+} from 'src/utils/utils'
 
 function ProductDetail() {
-  const { id } = useParams()
+  const { nameId } = useParams()
+  const id = getIdFromNameId(nameId as string)
 
   const { data: productDetailData } = useQuery({
     queryKey: [QueryKeys.product, id],
@@ -85,6 +91,8 @@ function ProductDetail() {
                   alt={product?.name}
                   // C1
                   // className='pointer-events-none absolute top-0 left-0 h-full w-full bg-white object-cover'
+                  // C2
+                  className='absolute top-0 left-0 h-full w-full bg-white object-cover'
                   ref={imageRef}
                 />
               </div>

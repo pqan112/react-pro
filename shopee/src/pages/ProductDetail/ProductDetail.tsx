@@ -6,13 +6,14 @@ import productApi from 'src/apis/product.api'
 import InputNumber from 'src/components/InputNumber'
 import ProductRating from 'src/components/ProductRating'
 import { QueryKeys } from 'src/constants/queryKey'
-import { Product } from 'src/types/product.type'
+import { Product as ProductType, ProductListConfig } from 'src/types/product.type'
 import {
   formatCurrency,
   formatNumberToSocialStyle,
   getIdFromNameId,
   rateSale
 } from 'src/utils/utils'
+import Product from '../ProductList/components/Product'
 
 function ProductDetail() {
   const { nameId } = useParams()
@@ -22,9 +23,26 @@ function ProductDetail() {
     queryKey: [QueryKeys.product, id],
     queryFn: () => productApi.getProductDetail(id as string)
   })
+  const product = productDetailData?.data.data
+  const queryConfig: ProductListConfig = useMemo(() => {
+    return {
+      page: '1',
+      limit: '20',
+      category: product?.category._id
+    }
+  }, [product])
+
+  const { data: productsData } = useQuery({
+    queryKey: [QueryKeys.products, queryConfig],
+    queryFn: () => {
+      return productApi.getProducts(queryConfig)
+    },
+    enabled: !!product,
+    staleTime: 5 * 60 * 1000
+  })
+
   const [currrentIndexImages, setCurrentIndexImages] = useState([0, 5])
   const [activeImage, setActiveImage] = useState<string | undefined>(undefined)
-  const product = productDetailData?.data.data
   const imageRef = useRef<HTMLImageElement>(null)
   const currentImages = useMemo(() => {
     return product ? product.images.slice(...currrentIndexImages) : []
@@ -41,7 +59,7 @@ function ProductDetail() {
   }
 
   const next = () => {
-    if (currrentIndexImages[1] < (product as Product)?.images.length) {
+    if (currrentIndexImages[1] < (product as ProductType)?.images.length) {
       setCurrentIndexImages((prev) => [prev[0] + 1, prev[1] + 1])
     }
   }
@@ -311,8 +329,8 @@ function ProductDetail() {
 
       <div className='mt-8'>
         <div className='container'>
-          <div className='uppercase text-gray-400'>CÓ THỂ BẠN CŨNG THÍCH</div>
-          {/* {productsData && (
+          <div className='uppercase text-gray-500'>Có thể bạn cũng thích</div>
+          {productsData && (
             <div className='mt-6 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'>
               {productsData.data.data.products.map((product) => (
                 <div className='col-span-1' key={product._id}>
@@ -320,7 +338,7 @@ function ProductDetail() {
                 </div>
               ))}
             </div>
-          )} */}
+          )}
         </div>
       </div>
     </div>

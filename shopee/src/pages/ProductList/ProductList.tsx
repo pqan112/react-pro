@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import categoryApi from 'src/apis/category.api'
+import productApi from 'src/apis/product.api'
 import Pagination from 'src/components/Pagination'
 import { QueryKeys } from 'src/constants/queryKey'
 import useQueryConfig from 'src/hooks/useQueryConfig'
-import { useProductList } from 'src/queries/useProduct'
 import { ProductListConfig } from 'src/types/product.type'
 import AsideFilter from './components/AsideFilter'
 import Product from './components/Product'
@@ -11,7 +11,15 @@ import SortProductList from './components/SortProductList'
 
 const ProductList = () => {
   const queryConfig = useQueryConfig()
-  const { data: productsData } = useProductList(queryConfig as ProductListConfig)
+  const { data: productsData } = useQuery({
+    queryKey: [QueryKeys.products, queryConfig],
+    queryFn: () => {
+      return productApi.getProducts(queryConfig as ProductListConfig)
+    },
+    keepPreviousData: true,
+    staleTime: 5 * 60 * 1000
+  })
+
   const { data: categoriesData } = useQuery({
     queryKey: [QueryKeys.categories],
     queryFn: () => categoryApi.getCategories()

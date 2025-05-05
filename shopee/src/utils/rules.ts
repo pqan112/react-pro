@@ -155,10 +155,10 @@ export const schema = yup.object({
 
 export type Schema = yup.InferType<typeof schema>
 
-export const loginSchema = schema.omit(['confirm_password', 'price_max', 'price_min'])
+export const loginSchema = schema.omit(['confirm_password', 'price_max', 'price_min', 'name'])
 export type LoginSchema = yup.InferType<typeof loginSchema>
 
-export const registerSchema = schema.omit(['price_max', 'price_min'])
+export const registerSchema = schema.omit(['price_max', 'price_min', 'name'])
 export type RegisterSchema = yup.InferType<typeof registerSchema>
 
 export const priceRangeSchema = schema.pick(['price_max', 'price_min'])

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import DOMPurify from 'dompurify'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -15,6 +15,7 @@ import {
 } from 'src/utils/utils'
 import Product from '../ProductList/components/Product'
 import QuantityController from 'src/components/QuantityController'
+import purchaseApi from 'src/apis/purchase.api'
 
 function ProductDetail() {
   const { nameId } = useParams()
@@ -48,6 +49,9 @@ function ProductDetail() {
   const currentImages = useMemo(() => {
     return product ? product.images.slice(...currrentIndexImages) : []
   }, [currrentIndexImages, product])
+  const addToCartMutation = useMutation({
+    mutationFn: purchaseApi.addToCart
+  })
 
   useEffect(() => {
     if (product && product.images.length > 0) {
@@ -95,6 +99,13 @@ function ProductDetail() {
 
   const handleBuyCount = (value: number) => {
     setBuyCount(value)
+  }
+
+  const addToCart = () => {
+    addToCartMutation.mutate({
+      product_id: product?._id as string,
+      buy_count: buyCount
+    })
   }
 
   if (!product) return null
@@ -223,7 +234,7 @@ function ProductDetail() {
               </div>
               <div className='mt-8 flex items-center'>
                 <button
-                  // onClick={addToCart}
+                  onClick={addToCart}
                   className='flex h-12 items-center justify-center rounded-sm border border-orange bg-orange/10 px-5 capitalize text-orange shadow-sm hover:bg-orange/5'
                 >
                   <svg

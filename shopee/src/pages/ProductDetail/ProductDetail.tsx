@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import DOMPurify from 'dompurify'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -16,6 +16,8 @@ import {
 import Product from '../ProductList/components/Product'
 import QuantityController from 'src/components/QuantityController'
 import purchaseApi from 'src/apis/purchase.api'
+import { purchaseStatus } from 'src/constants/purchase'
+import { toast } from 'react-toastify'
 
 function ProductDetail() {
   const { nameId } = useParams()
@@ -49,6 +51,7 @@ function ProductDetail() {
   const currentImages = useMemo(() => {
     return product ? product.images.slice(...currrentIndexImages) : []
   }, [currrentIndexImages, product])
+  const queryClient = useQueryClient()
   const addToCartMutation = useMutation({
     mutationFn: purchaseApi.addToCart
   })
@@ -102,10 +105,18 @@ function ProductDetail() {
   }
 
   const addToCart = () => {
-    addToCartMutation.mutate({
-      product_id: product?._id as string,
-      buy_count: buyCount
-    })
+    addToCartMutation.mutate(
+      {
+        product_id: product?._id as string,
+        buy_count: buyCount
+      },
+      {
+        onSuccess: (data) => {
+          toast.success(data.data.message, { autoClose: 3000 })
+          queryClient.invalidateQueries([QueryKeys.purchases, { status: purchaseStatus.inCart }])
+        }
+      }
+    )
   }
 
   if (!product) return null

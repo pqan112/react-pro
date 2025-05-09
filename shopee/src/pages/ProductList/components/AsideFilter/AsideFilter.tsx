@@ -11,6 +11,7 @@ import { PriceRangeSchema, schema } from 'src/utils/rules'
 import RatingStars from '../RatingStars'
 import omit from 'lodash/omit'
 import { QueryConfig } from 'src/hooks/useQueryConfig'
+import { useState } from 'react'
 
 interface AsideFilterProps {
   queryConfig: QueryConfig

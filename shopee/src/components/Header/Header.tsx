@@ -1,5 +1,5 @@
 import { yupResolver } from '@hookform/resolvers/yup'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { omit } from 'lodash'
 import { useContext, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
@@ -31,7 +31,7 @@ const Header = () => {
     },
     resolver: yupResolver(nameSchema)
   })
-
+  const queryClient = useQueryClient()
   const { setIsAuthenticated, isAuthenticated, setProfile, profile } = useContext(AppContext)
 
   const logoutMutation = useMutation({
@@ -39,6 +39,9 @@ const Header = () => {
     onSuccess: () => {
       setIsAuthenticated(false)
       setProfile(null)
+      queryClient.removeQueries({
+        queryKey: [QueryKeys.purchases, { status: purchaseStatus.inCart }]
+      })
     }
   })
 
@@ -238,9 +241,12 @@ const Header = () => {
                         <span className='text-sx capitalize text-gray-500'>
                           {purchasesInCart.slice(MAX_PURCHASE).length} Thêm vào giỏ hàng
                         </span>
-                        <button className='rounded-sm bg-orange px-3 py-1 text-white hover:opacity-80'>
+                        <Link
+                          to={path.cart}
+                          className='rounded-sm bg-orange px-3 py-1 text-white hover:opacity-80'
+                        >
                           Xem giỏ hàng
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   ) : (
@@ -252,7 +258,7 @@ const Header = () => {
                 </div>
               }
             >
-              <Link to='/cart' className='relative'>
+              <Link to={path.cart} className='relative'>
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   fill='none'

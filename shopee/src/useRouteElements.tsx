@@ -10,6 +10,7 @@ import ProductList from './pages/ProductList'
 import Profile from './pages/Profile'
 import Register from './pages/Register'
 import ProductDetail from './pages/ProductDetail'
+import Cart from './pages/Cart'
 
 export default function useRouteElements() {
   function ProtectedRoute() {
@@ -55,6 +56,14 @@ export default function useRouteElements() {
           element: (
             <MainLayout>
               <Profile />
+            </MainLayout>
+          )
+        },
+        {
+          path: path.cart,
+          element: (
+            <MainLayout>
+              <Cart />
             </MainLayout>
           )
         }

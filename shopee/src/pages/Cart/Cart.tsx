@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { produce } from 'immer'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -13,12 +13,19 @@ import { formatCurrency, generateNameId } from 'src/utils/utils'
 
 export default function Cart() {
   const [extendedPurchases, setExtendedPurchases] = useState<ExtendedPurchase[]>([])
-  const { data: purchaseInCartData } = useQuery({
+  const { data: purchaseInCartData, refetch } = useQuery({
     queryKey: [QueryKeys.purchases, { status: purchaseStatus.inCart }],
     queryFn: () => purchaseApi.getPurchases({ status: purchaseStatus.inCart })
   })
+  const updatePurchaseMutation = useMutation({
+    mutationFn: purchaseApi.updatePurchase,
+    onSuccess: () => {
+      refetch()
+    }
+  })
   const purchasesInCart = purchaseInCartData?.data.data
   const isAllChecked = extendedPurchases.every((purchase) => purchase.checked)
+
   useEffect(() => {
     setExtendedPurchases(
       purchasesInCart?.map((purchase) => ({
@@ -48,7 +55,23 @@ export default function Cart() {
     )
   }
 
-  console.log(extendedPurchases)
+  const handleQuantity = (purchaseId: string, value: number) => {
+    const purchaseIndex = extendedPurchases.findIndex(
+      (purchase: ExtendedPurchase) => purchase._id === purchaseId
+    )
+    if (purchaseIndex < 0) return
+    const purchase = extendedPurchases[purchaseIndex]
+    setExtendedPurchases(
+      produce((draft) => {
+        draft[purchaseIndex].disabled = true
+      })
+    )
+    updatePurchaseMutation.mutate({
+      product_id: purchase?.product._id as string,
+      purchase_id: purchaseId,
+      buy_count: value
+    })
+  }
 
   return (
     <div className='bg-neutral-100 py-16'>
@@ -80,7 +103,10 @@ export default function Cart() {
             </div>
             <div className='my-3 rounded-sm shadow'>
               {extendedPurchases?.map((purchase) => (
-                <div className='mb-5 grid grid-cols-12 items-center rounded-sm bg-white py-5 px-9 text-center text-sm text-gray-500 first:mt-0'>
+                <div
+                  className='mb-5 grid grid-cols-12 items-center rounded-sm bg-white py-5 px-9 text-center text-sm text-gray-500 first:mt-0'
+                  key={purchase._id}
+                >
                   <div className='sticky left-9 col-span-6 bg-white'>
                     <div className='flex'>
                       <div className='flex flex-shrink-0 items-center justify-center pr-3'>
@@ -132,6 +158,9 @@ export default function Cart() {
                           max={purchase.product.quantity}
                           value={purchase.buy_count}
                           classNameWrapper=''
+                          onIncrease={(value) => handleQuantity(purchase._id, value)}
+                          onDecrease={(value) => handleQuantity(purchase._id, value)}
+                          disabled={purchase.disabled}
                         />
                       </div>
                       <div className='col-span-1'>

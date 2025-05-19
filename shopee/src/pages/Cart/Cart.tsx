@@ -45,6 +45,14 @@ export default function Cart() {
   const isAllChecked = extendedPurchases.every((purchase) => purchase.checked)
   const checkedPurchases = extendedPurchases.filter((purchase) => purchase.checked)
   const checkedPurchasesCount = checkedPurchases.length
+  const totalCheckedPurchasePrice = checkedPurchases.reduce((total, purchase) => {
+    return total + purchase.product.price * purchase.buy_count
+  }, 0)
+  const totalCheckedPurchaseSavingPrice = checkedPurchases.reduce((total, purchase) => {
+    return (
+      total + (purchase.product.price_before_discount - purchase.product.price) * purchase.buy_count
+    )
+  }, 0)
 
   useEffect(() => {
     setExtendedPurchases((prev) => {
@@ -93,7 +101,6 @@ export default function Cart() {
 
   const handleQuantity = (purchaseId: string, value: number, enable: boolean) => {
     if (enable) {
-      console.log('enable')
       const purchaseIndex = extendedPurchases.findIndex(
         (purchase: ExtendedPurchase) => purchase._id === purchaseId
       )
@@ -122,15 +129,15 @@ export default function Cart() {
     deletePurchasesMutation.mutate(purchasesIds)
   }
 
-  // const handleBuyPurchases = () => {
-  //   if (checkedPurchases.length > 0) {
-  //     const body = checkedPurchases.map((purchase) => ({
-  //       product_id: purchase.product._id,
-  //       buy_count: purchase.buy_count
-  //     }))
-  //     buyProductsMutation.mutate(body)
-  //   }
-  // }
+  const handleBuyPurchases = () => {
+    if (checkedPurchases.length > 0) {
+      const body = checkedPurchases.map((purchase) => ({
+        product_id: purchase.product._id,
+        buy_count: purchase.buy_count
+      }))
+      buyProductsMutation.mutate(body)
+    }
+  }
 
   return (
     <div className='bg-neutral-100 py-16'>
@@ -223,13 +230,6 @@ export default function Cart() {
                           onDecrease={(value) => handleQuantity(purchase._id, value, value >= 1)}
                           onType={handleTypeQuantity(purchase._id)}
                           onFocusOut={(value) => {
-                            console.log(
-                              'onFocusOut',
-                              value,
-                              purchase.buy_count,
-                              value !== (purchasesInCart as Purchase[])[index].buy_count
-                            )
-
                             handleQuantity(
                               purchase._id,
                               value,
@@ -284,15 +284,23 @@ export default function Cart() {
           <div className='mt-5 flex flex-col sm:ml-auto sm:mt-0 sm:flex-row sm:items-center'>
             <div>
               <div className='flex items-center sm:justify-end'>
-                <div>Tổng thanh toán (5 sản phẩm):</div>
-                <div className='ml-2 text-2xl text-orange'>₫{formatCurrency(12000)}</div>
+                <div>Tổng thanh toán ({checkedPurchasesCount} sản phẩm):</div>
+                <div className='ml-2 text-2xl text-orange'>
+                  ₫{formatCurrency(totalCheckedPurchasePrice)}
+                </div>
               </div>
               <div className='flex items-center text-sm sm:justify-end'>
                 <div className='text-gray-500'>Tiết kiệm</div>
-                <div className='ml-6 text-orange'>₫{formatCurrency(10000)}</div>
+                <div className='ml-6 text-orange'>
+                  ₫{formatCurrency(totalCheckedPurchaseSavingPrice)}
+                </div>
               </div>
             </div>
-            <Button className='flex h-10 w-52 items-center justify-center bg-red-500 text-sm uppercase text-white hover:bg-red-600 sm:ml-4 sm:mt-0'>
+            <Button
+              onClick={handleBuyPurchases}
+              disabled={buyProductsMutation.isLoading}
+              className='flex h-10 w-52 items-center justify-center bg-red-500 text-sm uppercase text-white hover:bg-red-600 sm:ml-4 sm:mt-0'
+            >
               Mua hàng
             </Button>
           </div>

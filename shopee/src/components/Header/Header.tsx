@@ -1,42 +1,29 @@
-import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { omit } from 'lodash'
-import { useContext, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { createSearchParams, Link, useNavigate } from 'react-router-dom'
+import { useContext } from 'react'
+import { Link } from 'react-router-dom'
 
 import authApi from 'src/apis/auth.api'
-import path from 'src/constants/path'
-import { AppContext } from 'src/contexts/app.context'
-import useQueryConfig from 'src/hooks/useQueryConfig'
-import { Schema, schema } from 'src/utils/rules'
-import Popover from '../Popover'
-import { QueryKeys } from 'src/constants/queryKey'
-import { purchaseStatus } from 'src/constants/purchase'
 import purchaseApi from 'src/apis/purchase.api'
 import noproduct from 'src/assets/images/no-product.png'
+import path from 'src/constants/path'
+import { purchaseStatus } from 'src/constants/purchase'
+import { QueryKeys } from 'src/constants/queryKey'
+import { AppContext } from 'src/contexts/app.context'
+import useQueryConfig from 'src/hooks/useQueryConfig'
+import useSearchProducts from 'src/hooks/useSearchProducts'
 import { formatCurrency } from 'src/utils/utils'
+import Popover from '../Popover'
 
-type FormData = Pick<Schema, 'name'>
-const nameSchema = schema.pick(['name'])
 const MAX_PURCHASE = 5
 
 const Header = () => {
-  const navigate = useNavigate()
-  const queryConfig = useQueryConfig()
-
-  const { register, handleSubmit, formState } = useForm<FormData>({
-    defaultValues: {
-      name: ''
-    },
-    resolver: yupResolver(nameSchema)
-  })
   const queryClient = useQueryClient()
+  const { register, onSubmitSearch, formState } = useSearchProducts()
   const { setIsAuthenticated, isAuthenticated, setProfile, profile } = useContext(AppContext)
 
   const logoutMutation = useMutation({
     mutationFn: authApi.logout,
-    onSuccess: () => {
+    onSettled: () => {
       setIsAuthenticated(false)
       setProfile(null)
       queryClient.removeQueries({
@@ -54,28 +41,6 @@ const Header = () => {
 
   const handleLogout = () => {
     logoutMutation.mutate()
-  }
-
-  const onSubmitHandler = (data: FormData) => {
-    const config = queryConfig.order
-      ? omit(
-          {
-            ...queryConfig,
-            name: data.name,
-            page: String(1)
-          },
-          ['order', 'sort_by']
-        )
-      : {
-          ...queryConfig,
-          name: data.name,
-          page: String(1)
-        }
-
-    navigate({
-      pathname: path.home,
-      search: createSearchParams(config).toString()
-    })
   }
 
   return (
@@ -176,7 +141,7 @@ const Header = () => {
               </g>
             </svg>
           </Link>
-          <form className='col-span-9' onSubmit={handleSubmit(onSubmitHandler)}>
+          <form className='col-span-9' onSubmit={onSubmitSearch}>
             <div className='flex rounded-sm bg-white p-1'>
               <input
                 {...register('name')}

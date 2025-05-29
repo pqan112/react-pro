@@ -2,7 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { produce } from 'immer'
 import keyBy from 'lodash/keyBy'
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import purchaseApi from 'src/apis/purchase.api'
 import Button from 'src/components/Button'
@@ -14,6 +14,8 @@ import { ExtendedPurchase, Purchase } from 'src/types/purchase.type'
 import { formatCurrency, generateNameId } from 'src/utils/utils'
 
 export default function Cart() {
+  const location = useLocation()
+  const purchaseBuyNowId = (location.state as { purchaseId: string } | null)?.purchaseId
   const [extendedPurchases, setExtendedPurchases] = useState<ExtendedPurchase[]>([])
   const { data: purchaseInCartData, refetch } = useQuery({
     queryKey: [QueryKeys.purchases, { status: purchaseStatus.inCart }],
@@ -59,14 +61,23 @@ export default function Cart() {
       const extendedPurchaseObject = keyBy(prev, '_id')
 
       return (
-        purchasesInCart?.map((purchase) => ({
-          ...purchase,
-          disabled: false,
-          checked: Boolean(extendedPurchaseObject[purchase._id]?.checked)
-        })) || []
+        purchasesInCart?.map((purchase) => {
+          const isPurchaseBuyNow = purchaseBuyNowId === purchase._id
+          return {
+            ...purchase,
+            disabled: false,
+            checked: isPurchaseBuyNow || Boolean(extendedPurchaseObject[purchase._id]?.checked)
+          }
+        }) || []
       )
     })
-  }, [purchasesInCart])
+  }, [purchasesInCart, purchaseBuyNowId])
+
+  useEffect(() => {
+    return () => {
+      history.replaceState(null, '')
+    }
+  }, [])
 
   const handleCheck = (purchaseId: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setExtendedPurchases(

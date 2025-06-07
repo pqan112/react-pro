@@ -2,5 +2,6 @@ export const QueryKeys = {
   products: 'products',
   product: 'product',
   categories: 'categories',
-  purchases: 'purchases'
+  purchases: 'purchases',
+  profile: 'profile'
 } as const

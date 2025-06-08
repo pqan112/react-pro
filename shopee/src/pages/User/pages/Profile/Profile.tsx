@@ -1,5 +1,5 @@
 import { yupResolver } from '@hookform/resolvers/yup'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Fragment, useContext, useEffect } from 'react'
 import { Controller, useForm, useFormContext } from 'react-hook-form'
 import userApi from 'src/apis/user.api'
@@ -10,6 +10,8 @@ import { QueryKeys } from 'src/constants/queryKey'
 import { AppContext } from 'src/contexts/app.context'
 import { userSchema, UserSchema } from 'src/utils/rules'
 import DateSelect from '../../components/DateSelect'
+import { toast } from 'react-toastify'
+import { setProfileToLocalStorage } from 'src/utils/auth'
 
 // function Info() {
 //   const {
@@ -71,13 +73,8 @@ type FormData = Pick<UserSchema, 'name' | 'address' | 'phone' | 'date_of_birth' 
 const profileSchema = userSchema.pick(['name', 'address', 'phone', 'date_of_birth', 'avatar'])
 export default function Profile() {
   const { setProfile } = useContext(AppContext)
-  // const [file, setFile] = useState<File>()
 
-  // const previewImage = useMemo(() => {
-  //   return file ? URL.createObjectURL(file) : ''
-  // }, [file])
-
-  const { data: profileData } = useQuery({
+  const { data: profileData, refetch } = useQuery({
     queryKey: [QueryKeys.profile],
     queryFn: userApi.getProfile
   })
@@ -116,21 +113,11 @@ export default function Profile() {
     }
   }, [profile, reset])
 
-  // const updateProfileMutation = useMutation({
-  //   mutationFn: userApi.updateProfile
-  // })
+  const updateProfileMutation = useMutation({
+    mutationFn: userApi.updateProfile
+  })
   // const uploadAvatarMutaion = useMutation({
   //   mutationFn: userApi.uploadAvatar
-  // })
-  // const methods = useForm<FormData>({
-  //   defaultValues: {
-  //     name: '',
-  //     phone: '',
-  //     address: '',
-  //     avatar: '',
-  //     date_of_birth: new Date(1990, 0, 1)
-  //   },
-  //   resolver: yupResolver<FormData>(profileSchema)
   // })
   // const {
   //   register,
@@ -156,43 +143,20 @@ export default function Profile() {
   //     )
   //   }
   // }, [profile, setValue])
-  // const onSubmit = handleSubmit(async (data) => {
-  //   try {
-  //     let avatarName = avatar
-  //     if (file) {
-  //       const form = new FormData()
-  //       form.append('image', file)
-  //       const uploadRes = await uploadAvatarMutaion.mutateAsync(form)
-  //       avatarName = uploadRes.data.data
-  //       setValue('avatar', avatarName)
-  //     }
-  //     const res = await updateProfileMutation.mutateAsync({
-  //       ...data,
-  //       date_of_birth: data.date_of_birth?.toISOString(),
-  //       avatar: avatarName
-  //     })
-  //     setProfile(res.data.data)
-  //     setProfileToLS(res.data.data)
-  //     // refetch()
-  //     toast.success(res.data.message)
-  //   } catch (error) {
-  //     if (isAxiosUnprocessableEntityError<ErrorResponse<FormDataError>>(error)) {
-  //       const formError = error.response?.data.data
-  //       if (formError) {
-  //         Object.keys(formError).forEach((key) => {
-  //           setError(key as keyof FormDataError, {
-  //             message: formError[key as keyof FormDataError],
-  //             type: 'Server'
-  //           })
-  //         })
-  //       }
-  //     }
-  //   }
-  // })
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      const res = await updateProfileMutation.mutateAsync({
+        ...data,
+        date_of_birth: data.date_of_birth?.toISOString()
+      })
+      refetch()
+      toast.success(res.data.message)
+      setProfile(res.data.data)
+      setProfileToLocalStorage(res.data.data)
+    } catch (error) {}
+  })
 
-  // const handleChangeFile = (file?: File) => {
-  //   setFile(file)
-  // }
+  console.log(errors)
 
   return (
     <div className='rounded-sm bg-white px-2 pb-10 shadow md:px-7 md:pb-20'>
@@ -203,10 +167,7 @@ export default function Profile() {
         </div>
       </div>
       {/* <FormProvider {...methods}> */}
-      <form
-        className='mt-8 flex flex-col-reverse md:flex-row md:items-start'
-        // onSubmit={onSubmit}
-      >
+      <form className='mt-8 flex flex-col-reverse md:flex-row md:items-start' onSubmit={onSubmit}>
         <div className='mt-6 flex-grow md:mt-0 md:pr-12'>
           <div className='flex flex-col flex-wrap sm:flex-row'>
             <div className='truncate pt-3 capitalize sm:w-[20%] sm:text-right'>Email</div>
@@ -258,7 +219,7 @@ export default function Profile() {
               />
             </div>
           </div>
-          {/* <Controller
+          <Controller
             control={control}
             name='date_of_birth'
             render={({ field }) => (
@@ -268,9 +229,9 @@ export default function Profile() {
                 onChange={field.onChange}
               />
             )}
-          /> */}
+          />
 
-          <DateSelect />
+          {/* <DateSelect /> */}
           <div className='mt-2 flex flex-col flex-wrap sm:flex-row'>
             <div className='truncate pt-3 capitalize sm:w-[20%] sm:text-right' />
             <div className='sm:w-[80%] sm:pl-5'>
@@ -290,7 +251,10 @@ export default function Profile() {
             </div>
             {/* <InputFile onChange={handleChangeFile} /> */}
             <input className='hidden' type='file' accept='.jpg,.jpeg,.png' />
-            <button className='flex h-10 items-center justify-end rounded-sm border bg-white px-6 text-sm text-gray-600 shadow-sm'>
+            <button
+              className='flex h-10 items-center justify-end rounded-sm border bg-white px-6 text-sm text-gray-600 shadow-sm'
+              type='button'
+            >
               Chọn ảnh
             </button>
 

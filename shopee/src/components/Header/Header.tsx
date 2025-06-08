@@ -11,7 +11,7 @@ import { QueryKeys } from 'src/constants/queryKey'
 import { AppContext } from 'src/contexts/app.context'
 import useQueryConfig from 'src/hooks/useQueryConfig'
 import useSearchProducts from 'src/hooks/useSearchProducts'
-import { formatCurrency } from 'src/utils/utils'
+import { formatCurrency, getAvatarUrl } from 'src/utils/utils'
 import Popover from '../Popover'
 
 const MAX_PURCHASE = 5
@@ -113,7 +113,7 @@ const Header = () => {
             >
               <div className='mr-2 h-5 w-5 flex-shrink-0'>
                 <img
-                  src='https://images.unsplash.com/photo-1661956602868-6ae368943878?ixlib=rb-4.0.3&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80'
+                  src={getAvatarUrl(profile?.avatar)}
                   className='h-full w-full rounded-[50%] object-cover'
                   alt='mailchimp'
                 />

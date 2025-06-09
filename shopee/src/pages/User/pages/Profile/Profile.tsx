@@ -1,7 +1,7 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { Fragment, useContext, useEffect } from 'react'
-import { Controller, useForm, useFormContext } from 'react-hook-form'
+import { useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import userApi from 'src/apis/user.api'
 import Button from 'src/components/Button'
 import Input from 'src/components/Input'
@@ -12,54 +12,10 @@ import { userSchema, UserSchema } from 'src/utils/rules'
 import DateSelect from '../../components/DateSelect'
 import { toast } from 'react-toastify'
 import { setProfileToLocalStorage } from 'src/utils/auth'
-
-// function Info() {
-//   const {
-//     register,
-//     control,
-//     formState: { errors }
-//   } = useFormContext<FormData>()
-//   return (
-//     <Fragment>
-//       <div className='mt-6 flex flex-col flex-wrap sm:flex-row'>
-//         <div className='truncate pt-3 capitalize sm:w-[20%] sm:text-right'>Tên</div>
-//         <div className='sm:w-[80%] sm:pl-5'>
-//           <Input
-//             classNameInput='w-full rounded-sm border border-gray-300 px-3 py-2 outline-none focus:border-gray-500 focus:shadow-sm'
-//             register={register}
-//             name='name'
-//             placeholder='Tên'
-//             errorMessage={errors.name?.message}
-//           />
-//         </div>
-//       </div>
-//       <div className='mt-2 flex flex-col flex-wrap sm:flex-row'>
-//         <div className='truncate pt-3 capitalize sm:w-[20%] sm:text-right'>Số điện thoại</div>
-//         <div className='sm:w-[80%] sm:pl-5'>
-//           <Controller
-//             control={control}
-//             name='phone'
-//             render={({ field }) => (
-//               <InputNumber
-//                 classNameInput='w-full rounded-sm border border-gray-300 px-3 py-2 outline-none focus:border-gray-500 focus:shadow-sm'
-//                 placeholder='Số điện thoại'
-//                 errorMessage={errors.phone?.message}
-//                 {...field}
-//                 onChange={field.onChange}
-//               />
-//             )}
-//           />
-//         </div>
-//       </div>
-//     </Fragment>
-//   )
-// }
-
-// type FormData = Pick<UserSchema, 'name' | 'address' | 'phone' | 'date_of_birth' | 'avatar'>
-// type FormDataError = Omit<FormData, 'date_of_birth'> & {
-//   date_of_birth?: string
-// }
-// const profileSchema = userSchema.pick(['name', 'address', 'phone', 'date_of_birth', 'avatar'])
+import http from 'src/utils/http'
+import { SuccessResponse } from 'src/types/utils.type'
+import { Status, UploadStatus } from 'src/constants/status.enum'
+import { AxiosProgressEvent } from 'axios'
 
 // Flow 1:
 // Nhấn upload: upload lên server luôn => server trả về url ảnh
@@ -72,20 +28,23 @@ import { setProfileToLocalStorage } from 'src/utils/auth'
 type FormData = Pick<UserSchema, 'name' | 'address' | 'phone' | 'date_of_birth' | 'avatar'>
 const profileSchema = userSchema.pick(['name', 'address', 'phone', 'date_of_birth', 'avatar'])
 export default function Profile() {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [file, setFile] = useState<File>()
+  const [status, setStatus] = useState<UploadStatus>(Status.Idle)
+  const [progress, setProgress] = useState<number>(0)
   const { setProfile } = useContext(AppContext)
-
   const { data: profileData, refetch } = useQuery({
     queryKey: [QueryKeys.profile],
     queryFn: userApi.getProfile
   })
   const profile = profileData?.data.data
-  console.log(profile)
-
+  const previewImage = useMemo(() => (file ? URL.createObjectURL(file) : ''), [file])
   const {
     register,
     control,
     formState: { errors },
     handleSubmit,
+    watch,
     setValue,
     reset
   } = useForm<FormData>({
@@ -98,6 +57,8 @@ export default function Profile() {
     },
     resolver: yupResolver(profileSchema)
   })
+
+  const avatar = watch('avatar')
 
   useEffect(() => {
     if (profile) {
@@ -112,6 +73,34 @@ export default function Profile() {
       })
     }
   }, [profile, reset])
+
+  const uploadAvatar = async (file?: File) => {
+    if (!file) return
+    setStatus(Status.Loading)
+    setProgress(0)
+    const formData = new FormData()
+    formData.append('image', file)
+    try {
+      const res = await http.post<SuccessResponse<string>>('user/upload-avatar', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (progressEvent: AxiosProgressEvent) => {
+          const progress = progressEvent.total
+            ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            : 0
+          setProgress(progress)
+        }
+      })
+      setValue('avatar', res.data.data)
+      setStatus(Status.Success)
+      setProgress(100)
+    } catch (error) {
+      console.log('error', error)
+      setStatus(Status.Error)
+      setProgress(0)
+    }
+  }
 
   const updateProfileMutation = useMutation({
     mutationFn: userApi.updateProfile
@@ -156,7 +145,15 @@ export default function Profile() {
     } catch (error) {}
   })
 
-  console.log(errors)
+  const handleChangeFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const fileFromLocal = event.target.files?.[0]
+    setFile(fileFromLocal)
+    uploadAvatar(fileFromLocal)
+  }
+
+  const handleUpload = () => {
+    fileInputRef.current?.click()
+  }
 
   return (
     <div className='rounded-sm bg-white px-2 pb-10 shadow md:px-7 md:pb-20'>
@@ -246,14 +243,42 @@ export default function Profile() {
         </div>
         <div className='flex justify-center md:w-72 md:border-l md:border-l-gray-200'>
           <div className='flex flex-col items-center'>
-            <div className='my-5 h-24 w-24'>
-              <img src='' alt='' className='h-full w-full rounded-full object-cover' />
+            <div className='relative my-5 h-24 w-24'>
+              {status === Status.Success && (
+                <button
+                  className='absolute top-0 right-0 h-5 w-5 rounded-full bg-red-600 text-white'
+                  type='button'
+                  // onClick={}
+                >
+                  x
+                </button>
+              )}
+              <img
+                src={previewImage || avatar}
+                alt=''
+                className='h-full w-full rounded-full object-cover'
+              />
             </div>
+            {status === Status.Loading && (
+              <div className='mb-3 h-2 w-[100px] rounded-md border border-gray-300'>
+                <div
+                  className='h-full rounded-md bg-blue-600'
+                  style={{ width: `${progress}px` }}
+                ></div>
+              </div>
+            )}
             {/* <InputFile onChange={handleChangeFile} /> */}
-            <input className='hidden' type='file' accept='.jpg,.jpeg,.png' />
+            <input
+              className='hidden'
+              type='file'
+              accept='.jpg,.jpeg,.png'
+              ref={fileInputRef}
+              onChange={handleChangeFile}
+            />
             <button
               className='flex h-10 items-center justify-end rounded-sm border bg-white px-6 text-sm text-gray-600 shadow-sm'
               type='button'
+              onClick={handleUpload}
             >
               Chọn ảnh
             </button>

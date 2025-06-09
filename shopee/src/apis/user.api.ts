@@ -8,13 +8,6 @@ const userApi = {
   },
   updateProfile(body: BodyUpdateProfile) {
     return http.put<SuccessResponse<User>>('user', body)
-  },
-  uploadAvatar(body: FormData) {
-    return http.post<SuccessResponse<string>>('user/upload-avatar', body, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
   }
 }
 

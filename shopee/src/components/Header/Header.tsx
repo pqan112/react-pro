@@ -113,7 +113,7 @@ const Header = () => {
             >
               <div className='mr-2 h-5 w-5 flex-shrink-0'>
                 <img
-                  src={getAvatarUrl(profile?.avatar)}
+                  src={profile?.avatar}
                   className='h-full w-full rounded-[50%] object-cover'
                   alt='mailchimp'
                 />

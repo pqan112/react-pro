@@ -48,20 +48,11 @@ export default function DateSelect({ value, onChange, errorMessage }: Props) {
             className='h-10 w-[32%] cursor-pointer rounded-sm border border-black/10 px-3 hover:border-orange'
           >
             <option disabled>Ngày</option>
-            {range(1, 32).map((item) => {
-              // if (item > 30) {
-              //   return (
-              //     <option value={item} key={item} disabled>
-              //       {item}
-              //     </option>
-              //   )
-              // }
-              return (
-                <option value={item} key={item}>
-                  {item}
-                </option>
-              )
-            })}
+            {range(1, 32).map((item) => (
+              <option value={item} key={item}>
+                {item}
+              </option>
+            ))}
           </select>
           <select
             name='month'

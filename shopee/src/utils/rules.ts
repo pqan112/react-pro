@@ -114,6 +114,15 @@ import { AnyObject } from 'yup/lib/types'
 //   }
 // })
 
+function handleConfirmPasswordYup(refName: string) {
+  return yup
+    .string()
+    .required('Password là bắt buộc')
+    .min(6, 'Độ dài từ 6 - 160 ký tự')
+    .max(160, 'Độ dài từ 6 - 160 ký tự')
+    .oneOf([yup.ref(refName)], 'Nhập lại password không khớp')
+}
+
 function testPriceRange(this: yup.TestContext<AnyObject>) {
   const { price_min, price_max } = this.parent as { price_min: string; price_max: string }
   if (price_min !== '' && price_max !== '') {
@@ -134,12 +143,7 @@ export const schema = yup.object({
     .required('Password là bắt buộc')
     .min(6, 'Độ dài từ 6 - 160 ký tự')
     .max(160, 'Độ dài từ 6 - 160 ký tự'),
-  confirm_password: yup
-    .string()
-    .required('Password là bắt buộc')
-    .min(6, 'Độ dài từ 6 - 160 ký tự')
-    .max(160, 'Độ dài từ 6 - 160 ký tự')
-    .oneOf([yup.ref('password')], 'Nhập lại password không khớp'),
+  confirm_password: handleConfirmPasswordYup('password'),
   price_min: yup.string().test({
     name: 'price-not-allowed',
     message: 'Giá không phù hợp',

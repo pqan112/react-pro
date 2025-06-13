@@ -9,9 +9,8 @@ import path from 'src/constants/path'
 import { purchaseStatus } from 'src/constants/purchase'
 import { QueryKeys } from 'src/constants/queryKey'
 import { AppContext } from 'src/contexts/app.context'
-import useQueryConfig from 'src/hooks/useQueryConfig'
 import useSearchProducts from 'src/hooks/useSearchProducts'
-import { formatCurrency, getAvatarUrl } from 'src/utils/utils'
+import { formatCurrency } from 'src/utils/utils'
 import Popover from '../Popover'
 
 const MAX_PURCHASE = 5

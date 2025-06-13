@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { produce } from 'immer'
+import isEqual from 'lodash/isEqual'
 import keyBy from 'lodash/keyBy'
 import { useContext, useEffect, useMemo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
@@ -76,19 +77,30 @@ export default function Cart() {
     [checkedPurchases]
   )
 
+  // because extendedPurchases is move to AppContext,
+  // it has a different reference with the new state
+  // so we have to check are the prev and new state equal
+  // before updating the state
   useEffect(() => {
     setExtendedPurchases((prev) => {
       const extendedPurchaseObject = keyBy(prev, '_id')
-      return (
+      const newExtendedPurchases =
         purchasesInCart?.map((purchase) => {
-          const isPurchaseBuyNow = purchaseBuyNowId === purchase._id
+          const isChoosenPurchaseFromLocation = purchaseBuyNowId === purchase._id
           return {
             ...purchase,
             disabled: false,
-            checked: isPurchaseBuyNow || Boolean(extendedPurchaseObject[purchase._id]?.checked)
+            checked:
+              isChoosenPurchaseFromLocation ||
+              Boolean(extendedPurchaseObject[purchase._id]?.checked)
           }
         }) || []
-      )
+
+      // Only update if the new state is different from the previous state
+      if (isEqual(prev, newExtendedPurchases)) {
+        return prev
+      }
+      return newExtendedPurchases
     })
   }, [purchasesInCart, purchaseBuyNowId])
 
@@ -143,7 +155,6 @@ export default function Cart() {
       )
       updatePurchaseMutation.mutate({
         product_id: purchase?.product._id as string,
-        purchase_id: purchaseId,
         buy_count: value
       })
     }

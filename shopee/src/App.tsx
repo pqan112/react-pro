@@ -7,15 +7,15 @@ import { AppContext } from './contexts/app.context'
 
 function App() {
   const routeElements = useRouteElements()
-  const { resetCurrentProfile } = useContext(AppContext)
+  const { reset } = useContext(AppContext)
 
   useEffect(() => {
-    LocalStorageEventTarget.addEventListener('clearLocalStorage', resetCurrentProfile)
+    LocalStorageEventTarget.addEventListener('clearLocalStorage', reset)
 
     return () => {
-      LocalStorageEventTarget.removeEventListener('clearLocalStorage', resetCurrentProfile)
+      LocalStorageEventTarget.removeEventListener('clearLocalStorage', reset)
     }
-  }, [resetCurrentProfile])
+  }, [reset])
   return (
     <>
       {routeElements}

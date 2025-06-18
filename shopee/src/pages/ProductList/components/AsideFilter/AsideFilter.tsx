@@ -30,7 +30,8 @@ const AsideFilter = (props: AsideFilterProps) => {
     control,
     handleSubmit,
     trigger,
-    formState: { errors }
+    formState: { errors },
+    reset
   } = useForm<FormData>({
     resolver: yupResolver(priceSchema),
     shouldFocusError: false,
@@ -65,6 +66,7 @@ const AsideFilter = (props: AsideFilterProps) => {
         omit(queryConfig, ['category', 'price_min', 'price_max', 'rating_filter'])
       ).toString()
     })
+    reset()
   }
 
   return (

@@ -34,7 +34,7 @@ const InputNumber = forwardRef<HTMLInputElement, InputNumberProps>(function Inpu
     <div className={className}>
       <input
         className={classNameInput}
-        value={value || localValue}
+        value={value === undefined ? localValue : value}
         onChange={handleChange}
         {...rest}
         ref={ref}
